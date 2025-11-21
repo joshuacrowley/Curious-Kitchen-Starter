@@ -1,4 +1,3 @@
-import React from 'react';
 import {ValueOrUndefined} from 'tinybase';
 import {useAddRowCallback, useSetValueCallback} from 'tinybase/ui-react';
 import {Button} from '@/components/ui/button';

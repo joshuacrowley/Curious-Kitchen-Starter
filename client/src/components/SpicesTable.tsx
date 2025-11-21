@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {useRowIds, useRow} from 'tinybase/ui-react';
+import {useState} from 'react';
+import {useRowIds, useRow, useDelRowCallback} from 'tinybase/ui-react';
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import {
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Pencil, Trash2} from 'lucide-react';
-import {deleteSpice, type Spice} from '../store';
+import {type Spice} from '../store';
 import {SpiceForm} from './SpiceForm';
 
 interface SpiceRowProps {
@@ -19,14 +19,15 @@ interface SpiceRowProps {
 }
 
 function SpiceRow({spiceId}: SpiceRowProps) {
-  const spice = useRow('spices', spiceId) as Spice;
+  const spice = useRow('spices', spiceId) as unknown as Spice;
   const [isEditing, setIsEditing] = useState(false);
+  const handleDeleteSpice = useDelRowCallback('spices', spiceId, undefined);
 
   if (!spice) return null;
 
   const handleDelete = () => {
     if (confirm(`Are you sure you want to delete ${spice.name}?`)) {
-      deleteSpice(spiceId);
+      handleDeleteSpice();
     }
   };
 

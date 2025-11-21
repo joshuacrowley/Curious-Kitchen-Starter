@@ -103,7 +103,7 @@ export function getAllSpices(): Array<Spice & { id: string }> {
   const spiceIds = store.getRowIds('spices');
   return spiceIds.map(id => ({
     id,
-    ...(store.getRow('spices', id) as Spice),
+    ...(store.getRow('spices', id) as unknown as Spice),
   }));
 }
 
@@ -111,7 +111,7 @@ export function getAllSpices(): Array<Spice & { id: string }> {
  * Get a single spice by ID.
  */
 export function getSpice(spiceId: string): Spice | undefined {
-  return store.getRow('spices', spiceId) as Spice | undefined;
+  return store.getRow('spices', spiceId) as unknown as Spice | undefined;
 }
 
 // =============================================================================
@@ -140,9 +140,9 @@ export function setViewMode(mode: 'cards' | 'table'): void {
  * Example listener setup demonstrating reactivity.
  * Call this function to attach listeners to the store.
  */
-export function attachListeners(): void {
+export function attachListeners(storeInstance: MergeableStore = store): void {
   // Listen to changes in the spices table
-  store.addRowListener('spices', null, (store, tableId, rowId) => {
+  storeInstance.addRowListener('spices', null, (store, tableId, rowId) => {
     console.log(`[Spices] Row '${rowId}' changed`);
     if (store.hasRow(tableId, rowId)) {
       console.log('New data:', store.getRow(tableId, rowId));

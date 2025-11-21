@@ -1,32 +1,46 @@
-import React, {StrictMode, useState} from 'react';
+import {StrictMode} from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import {MergeableStore} from 'tinybase';
+import {createMergeableStore, MergeableStore} from 'tinybase';
 import {createLocalPersister} from 'tinybase/persisters/persister-browser';
 import {createWsSynchronizer} from 'tinybase/synchronizers/synchronizer-ws-client';
 import {
   Provider,
+  useCreateMergeableStore,
   useCreatePersister,
   useCreateSynchronizer,
 } from 'tinybase/ui-react';
-import {Inspector} from 'tinybase/ui-react-inspector';
-import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
-import {Button} from '@/components/ui/button';
-import {store, attachListeners} from './store';
+import {attachListeners} from './store';
 import {SpicesSection} from './components/SpicesSection';
 
 const SERVER_SCHEME = 'wss://';
-const SERVER = 'vite.tinybase.cloud';
-
-// Attach listeners once on module load
-attachListeners();
+const SERVER = 'curious-kitchen-server.7mgd9h2b9s.workers.dev';
 
 export const App = () => {
   const serverPathId = location.pathname;
-  const [showInspector, setShowInspector] = useState(false);
+
+  const store = useCreateMergeableStore(() => {
+    const newStore = createMergeableStore('spiceStore')
+      .setTablesSchema({
+        spices: {
+          name: { type: 'string' },
+          category: { type: 'string', default: '' },
+          quantity: { type: 'number', default: 0 },
+          inStock: { type: 'boolean', default: false },
+        },
+      })
+      .setValuesSchema({
+        viewMode: { type: 'string', default: 'cards' },
+      });
+    
+    // Attach listeners
+    attachListeners(newStore);
+    
+    return newStore;
+  });
 
   useCreatePersister(
     store,
-    (store) => createLocalPersister(store, 'local://spice-rack' + serverPathId),
+    (store) => createLocalPersister(store, 'local://' + SERVER + serverPathId),
     [],
     async (persister) => {
       await persister.startAutoLoad([
@@ -59,7 +73,7 @@ export const App = () => {
           },
         },
         {
-          viewMode: 'cards', // Default view mode (local only, not synced)
+          viewMode: 'cards',
         },
       ]);
       await persister.startAutoSave();
@@ -71,22 +85,6 @@ export const App = () => {
       store,
       new ReconnectingWebSocket(SERVER_SCHEME + SERVER + serverPathId),
       1,
-      // Send only tables, not values (values are local UI state only)
-      (requestJson) => {
-        const request = JSON.parse(requestJson);
-        if (request[3]) {
-          delete request[3]; // Remove values from sync
-        }
-        return JSON.stringify(request);
-      },
-      // Receive only tables, not values
-      (responseJson) => {
-        const response = JSON.parse(responseJson);
-        if (response[3]) {
-          delete response[3]; // Ignore values from sync
-        }
-        return JSON.stringify(response);
-      },
     );
     await synchronizer.startSync();
 
@@ -103,33 +101,14 @@ export const App = () => {
       <Provider store={store}>
         <div className="min-h-screen bg-background">
           <div className="container mx-auto max-w-7xl py-8 px-4 space-y-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold tracking-tight">Spice Rack Manager</h1>
-                <p className="text-muted-foreground mt-2">
-                  Manage your spice collection and inventory
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowInspector(!showInspector)}
-              >
-                {showInspector ? 'Hide' : 'Show'} Inspector
-              </Button>
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight">Curious Kitchen</h1>
+              <p className="text-muted-foreground mt-2">
+                Manage your spice collection and inventory
+              </p>
             </div>
 
             <SpicesSection />
-
-            {showInspector && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Store Inspector</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Inspector />
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </Provider>

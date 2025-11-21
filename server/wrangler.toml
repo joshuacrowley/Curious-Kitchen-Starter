@@ -1,8 +1,8 @@
 #:schema node_modules/wrangler/config-schema.json
-name = "vite-tinybase-ts-react-sync-durable-object-server"
+name = "curious-kitchen-server"
 main = "index.ts"
 compatibility_date = "2024-10-11"
-route = { pattern = "vite.tinybase.cloud", custom_domain = true }
+workers_dev = true
 
 [[durable_objects.bindings]]
 name = "TinyBaseDurableObjects"
@@ -10,8 +10,4 @@ class_name = "TinyBaseDurableObject"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["TinyBaseDurableObject"]
-
-[[migrations]]
-tag = "v2"
-new_sql_tables = ["TinyBaseDurableObject"]
+new_sqlite_classes = ["TinyBaseDurableObject"]

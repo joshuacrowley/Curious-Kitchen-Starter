@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {useSetPartialRowCallback, useStore} from 'tinybase/ui-react';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {addSpice, updateSpice, SPICE_CATEGORIES, type Spice} from '../store';
+import {SPICE_CATEGORIES, type Spice} from '../store';
 
 interface SpiceFormProps {
   open: boolean;
@@ -31,6 +32,19 @@ export function SpiceForm({open, onClose, spiceId, initialData}: SpiceFormProps)
   const [category, setCategory] = useState('');
   const [quantity, setQuantity] = useState<number | ''>('');
   const [inStock, setInStock] = useState(false);
+  const store = useStore();
+
+  const handleUpdateSpice = useSetPartialRowCallback(
+    'spices',
+    spiceId ?? '',
+    () => ({
+      name,
+      category,
+      quantity: typeof quantity === 'number' ? quantity : 0,
+      inStock,
+    }),
+    [name, category, quantity, inStock],
+  );
 
   useEffect(() => {
     if (initialData) {
@@ -49,18 +63,15 @@ export function SpiceForm({open, onClose, spiceId, initialData}: SpiceFormProps)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const spiceData = {
-      name,
-      category,
-      quantity: typeof quantity === 'number' ? quantity : 0,
-      inStock,
-    };
-
     if (spiceId) {
-      updateSpice(spiceId, spiceData);
+      handleUpdateSpice();
     } else {
-      const newId = `spice-${Date.now()}`;
-      addSpice(newId, spiceData);
+      store?.addRow('spices', {
+        name,
+        category,
+        quantity: typeof quantity === 'number' ? quantity : 0,
+        inStock,
+      });
     }
 
     onClose();

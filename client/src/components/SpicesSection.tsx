@@ -1,17 +1,18 @@
-import React, {useState} from 'react';
-import {useRowIds, useValue} from 'tinybase/ui-react';
+import {useState} from 'react';
+import {useRowIds, useValue, useSetValueCallback} from 'tinybase/ui-react';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {SpiceCard} from './SpiceCard';
 import {SpicesTable} from './SpicesTable';
 import {SpiceForm} from './SpiceForm';
 import {Plus, LayoutGrid, Table} from 'lucide-react';
-import {setViewMode} from '../store';
 
 export function SpicesSection() {
   const spiceIds = useRowIds('spices');
   const viewMode = useValue('viewMode') as 'cards' | 'table' || 'cards';
   const [isAdding, setIsAdding] = useState(false);
+  const setViewModeCards = useSetValueCallback('viewMode', () => 'cards', []);
+  const setViewModeTable = useSetValueCallback('viewMode', () => 'table', []);
 
   return (
     <>
@@ -24,7 +25,7 @@ export function SpicesSection() {
                 <Button
                   variant={viewMode === 'cards' ? 'default' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode('cards')}
+                  onClick={setViewModeCards}
                   className="rounded-r-none"
                 >
                   <LayoutGrid className="size-4" />
@@ -33,7 +34,7 @@ export function SpicesSection() {
                 <Button
                   variant={viewMode === 'table' ? 'default' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode('table')}
+                  onClick={setViewModeTable}
                   className="rounded-l-none"
                 >
                   <Table className="size-4" />
