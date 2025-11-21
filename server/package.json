@@ -1,0 +1,22 @@
+{
+  "name": "vite-tinybase-ts-react-sync-durable-object-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "author": "jamesgpearce",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250828.1",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.33.1"
+  },
+  "dependencies": {
+    "tinybase": "^6.6.0"
+  }
+}
